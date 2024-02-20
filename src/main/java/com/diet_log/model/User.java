@@ -1,24 +1,32 @@
 package com.diet_log.model;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class User {
+    UUID id;
     String name;
     String password;
     int recommendedCalorieIntake;
-    int actualCalorieIntake;
+
     LocalDateTime lastUpdated;
     public User(String name, String password) {
+        this.id =  UUID.randomUUID();
         this.name = name;
         this.password = password;
         this.lastUpdated = LocalDateTime.now();
     }
 
     public User(String name, String password, int recommendedCalorieIntake) {
+        this.id =  UUID.randomUUID();
         this.name = name;
         this.password = password;
         this.recommendedCalorieIntake = recommendedCalorieIntake;
         this.lastUpdated = LocalDateTime.now();
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     public String getName() {
@@ -45,15 +53,6 @@ public class User {
         this.recommendedCalorieIntake = recommendedCalorieIntake;
     }
 
-    public int getActualCalorieIntake() {
-        return actualCalorieIntake;
-
-    }
-
-    public void setActualCalorieIntake(int actualCalorieIntake) {
-        this.actualCalorieIntake = actualCalorieIntake;
-    }
-
     public LocalDateTime getLastUpdated() {
         return lastUpdated;
     }
@@ -65,10 +64,10 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "name='" + name + '\'' +
+                "id=" + id +
+                ", name='" + name + '\'' +
                 ", password='" + password + '\'' +
                 ", recommendedCalorieIntake=" + recommendedCalorieIntake +
-                ", actualCalorieIntake=" + actualCalorieIntake +
                 ", lastUpdated=" + lastUpdated +
                 '}';
     }
