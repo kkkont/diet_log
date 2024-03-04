@@ -4,25 +4,30 @@ import com.diet_log.model.Day;
 import com.diet_log.model.Record;
 import com.diet_log.model.User;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.Scanner;
 
 public class MainApp {
+    static String jdbcUrl = "jdbc:postgresql://localhost:5432/log";
+    static String username = "postgres";
+    static String password = "postgres";
+
+    static Connection connection = null;
+    static PreparedStatement preparedStatement = null;
+
+    static Scanner scanner = new Scanner(System.in);
+
     public static void main(String[] args) {
-        String jdbcUrl = "jdbc:postgresql://localhost:5432/log";
-        String username = "postgres";
-        String password = "postgres";
-
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
         try {
-            // Establish database connection
-            connection = DriverManager.getConnection(jdbcUrl, username, password);
-            createTable(connection);
-            // Insert records into the database
-
+            while (true) {
+                connection = DriverManager.getConnection(jdbcUrl, username, password);
+                createTables();
+                System.out.println("Register(R) or Log in (L):");
+                String input = scanner.nextLine().toLowerCase();  // Read user input
+                if (input.equals("r")) register();
+                else if (input.equals("l")) login();
+                else System.out.println("Wrong input!");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -34,19 +39,53 @@ public class MainApp {
                 e.printStackTrace();
             }
         }
-        User user = new User("kadri","Kadri2003");
-        Day day = new Day(user.getId());
-        System.out.println(user);
-        Record record = new Record(user.getId(), "Toit", 2,3,4,5,1,2,3);
-        Record record2 = new Record(user.getId(), "Toit2", 5,3,4,5,1,2,3);
-        day.addRecordToList(record);
-        day.addRecordToList(record2);
-        System.out.println(record);
-        System.out.println(day.dayOverView());
-        System.out.println(day.dayOverViewAllRecordsByEnergy());
     }
 
-    private static void createTable(Connection connection) throws SQLException {
+    private static void register() {
+        System.out.println("Username: ");
+        String name = scanner.nextLine().toLowerCase();
+
+        System.out.println("Password: ");
+        String userpassword = scanner.nextLine().toLowerCase();
+
+        System.out.println("Recommended calorie intake (type NO if not interested): ");
+        String recommendedCalorieIntake = scanner.nextLine().toLowerCase();
+
+        User user = null;
+        if (!recommendedCalorieIntake.equals("no")) {
+            try {
+                int calorieIntake = Integer.parseInt(recommendedCalorieIntake);
+                user = new User(name, userpassword, calorieIntake);
+            } catch (NumberFormatException e) {
+                System.out.println("Recommended calorie intake is not a valid integer! Try again.");
+                return;
+            }
+        }else user = new User(name, userpassword);
+
+        addUserToDatabase(user);
+        System.out.println("User created: " + user.toString());
+    }
+    private static void addUserToDatabase(User user) {
+        // Assuming you have a "users" table with columns "id", "username", "password", and "calorie_intake"
+        String query = "INSERT INTO users (id, name, password, recommended_calorie_intake) VALUES (?, ?, ?, ?)";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setObject(1, user.getId());
+            preparedStatement.setString(2, user.getName());
+            preparedStatement.setString(3, user.getPassword());
+            preparedStatement.setInt(4, user.getRecommendedCalorieIntake());
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace(); // Handle the exception according to your application's needs
+        }
+    }
+
+    private static void login() {
+        System.out.println("siin");
+    }
+
+    private static void createTables() throws SQLException {
         String createTableQuery = "CREATE TABLE IF NOT EXISTS records ("
                 + "id SERIAL PRIMARY KEY, "
                 + "user_id UUID, "
@@ -59,6 +98,21 @@ public class MainApp {
                 + "fiber DOUBLE PRECISION, "
                 + "protein DOUBLE PRECISION)";
 
-        connection.createStatement().executeUpdate(createTableQuery);
+        String createTableQuery2 = "CREATE TABLE IF NOT EXISTS users ("
+                + "id UUID PRIMARY KEY, "
+                + "name VARCHAR(255), "
+                + "password VARCHAR(255), "
+                + "recommended_calorie_intake INT)";
+
+        String createTableQuery3 = "CREATE TABLE IF NOT EXISTS day ("
+                + "id SERIAL PRIMARY KEY, "
+                + "date DATE, "
+                + "recordId SERIAL)";
+
+        Statement statement = connection.createStatement();
+        statement.executeUpdate(createTableQuery);
+        statement.executeUpdate(createTableQuery2);
+        statement.executeUpdate(createTableQuery3);
+        statement.close();
     }
 }

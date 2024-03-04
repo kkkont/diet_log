@@ -9,12 +9,11 @@ public class User {
     String password;
     int recommendedCalorieIntake;
 
-    LocalDateTime lastUpdated;
     public User(String name, String password) {
         this.id =  UUID.randomUUID();
         this.name = name;
         this.password = password;
-        this.lastUpdated = LocalDateTime.now();
+
     }
 
     public User(String name, String password, int recommendedCalorieIntake) {
@@ -22,7 +21,6 @@ public class User {
         this.name = name;
         this.password = password;
         this.recommendedCalorieIntake = recommendedCalorieIntake;
-        this.lastUpdated = LocalDateTime.now();
     }
 
     public UUID getId() {
@@ -53,22 +51,12 @@ public class User {
         this.recommendedCalorieIntake = recommendedCalorieIntake;
     }
 
-    public LocalDateTime getLastUpdated() {
-        return lastUpdated;
-    }
-
-    public void setLastUpdated(LocalDateTime lastUpdated) {
-        this.lastUpdated = lastUpdated;
-    }
-
     @Override
     public String toString() {
         return "User{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", password='" + password + '\'' +
-                ", recommendedCalorieIntake=" + recommendedCalorieIntake +
-                ", lastUpdated=" + lastUpdated +
-                '}';
+                ", recommendedCalorieIntake=" + recommendedCalorieIntake + "}";
     }
 }
