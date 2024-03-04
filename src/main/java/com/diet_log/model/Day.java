@@ -76,6 +76,13 @@ public class Day {
         return protein;
     }
 
+    public String dayOverViewAllRecordsByEnergy(){
+        StringBuilder output = new StringBuilder();
+        for(Record record:recordList){
+            output.append(record.name + ": " + record.energy + " kcal\n");
+        }
+        return String.valueOf(output);
+    }
     public String dayOverView() {
         return date + " OVERVIEW\n" +
                 "=".repeat(20) +
