@@ -22,6 +22,13 @@ public class User {
         this.password = password;
         this.recommendedCalorieIntake = recommendedCalorieIntake;
     }
+    //for existing user
+    public User(UUID id, String name, String password, int recommendedCalorieIntake) {
+        this.id =  id;
+        this.name = name;
+        this.password = password;
+        this.recommendedCalorieIntake = recommendedCalorieIntake;
+    }
 
     public UUID getId() {
         return id;

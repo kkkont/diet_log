@@ -6,6 +6,7 @@ import com.diet_log.model.User;
 
 import java.sql.*;
 import java.util.Scanner;
+import java.util.UUID;
 
 public class MainApp {
     static String jdbcUrl = "jdbc:postgresql://localhost:5432/log";
@@ -16,6 +17,7 @@ public class MainApp {
     static PreparedStatement preparedStatement = null;
 
     static Scanner scanner = new Scanner(System.in);
+    static User activeUser = null;
 
     public static void main(String[] args) {
         try {
@@ -63,6 +65,7 @@ public class MainApp {
         }else user = new User(name, userpassword);
 
         addUserToDatabase(user);
+        activeUser = user;
         System.out.println("User created: " + user.toString());
     }
     private static void addUserToDatabase(User user) {
@@ -82,7 +85,45 @@ public class MainApp {
     }
 
     private static void login() {
-        System.out.println("siin");
+        System.out.println("Username: ");
+        String name = scanner.nextLine().toLowerCase();
+
+        System.out.println("Password: ");
+        String userpassword = scanner.nextLine().toLowerCase();
+
+        User user = getUserFromDatabase(name, userpassword);
+
+        if (user != null) {
+            System.out.println("Login successful!");
+            System.out.println("User information: " + user.toString());
+            activeUser= user;
+        } else {
+            System.out.println("Invalid username or password. Please try again.");
+        }
+    }
+
+    private static User getUserFromDatabase(String username, String password) {
+        // Assuming you have a "users" table with columns "id", "username", "password", and "calorie_intake"
+        String query = "SELECT * FROM users WHERE name = ? AND password = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, password);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    UUID id = UUID.fromString(resultSet.getString("id"));
+                    int calorieIntake = resultSet.getInt("recommended_calorie_intake");
+
+                    return new User(id, username, password, calorieIntake);
+                } else {
+                    return null; // User not found
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace(); // Handle the exception according to your application's needs
+            return null;
+        }
     }
 
     private static void createTables() throws SQLException {
